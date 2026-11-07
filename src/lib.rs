@@ -1,4 +1,4 @@
-//! The private shared library of the house tools (LIB.1; owner rulings
+//! The shared library of the house tools (LIB.1; owner rulings
 //! OW.20/OW.22/OW.22b: "new private library for common tasks. keep GOH QA
 //! only"). Each module was a tracked copy in ztools, `sys_updater` and
 //! `app_updates`; the README records where each came from and how they had

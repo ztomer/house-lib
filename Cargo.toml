@@ -1,11 +1,11 @@
 [package]
 name = "house-lib"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 # The floor sys_updater, app_updates and ztools already build on; the code here
 # uses nothing newer (let-chains are 1.88, edition 2024 is 1.85).
 rust-version = "1.93"
-description = "The private shared library of the house tools: self-heal, the platform policy, ~ expansion, the detached spawn, and the Camoufox dependency rows."
+description = "The shared library of the house tools: self-heal, the platform policy, ~ expansion, the detached spawn, and the Camoufox dependency rows."
 license = "MIT"
 publish = false
 build = "build.rs"
