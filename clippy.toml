@@ -1,0 +1,6 @@
+# Test code may unwrap/expect/panic: a failing assertion IS the point.
+# This is the class-level answer to the restriction lints in test modules;
+# no `#[allow]` per module (house rule: #[allow] is forbidden).
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true

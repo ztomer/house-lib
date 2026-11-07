@@ -1,0 +1,130 @@
+# The gate of record, on every push and pull request: tools/gate.sh --full, the
+# command the pre-push hook runs, so CI cannot be weaker or stronger than it.
+# Adapted from sys_updater's workflow (the house shape: goh live, its floors met
+# by its own action, the manifest's tools installed and then checked present).
+# macOS on Apple silicon because that is where the local gate runs; the two
+# Linux targets are linted by GOH_RUST_LINT_CONFIGS in .gatesrc.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: never
+
+jobs:
+  gate:
+    name: the gate of record (tools/gate.sh --full)
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: GOH_DIR under the runner's temp
+        run: |
+          echo "GOH_DIR=$RUNNER_TEMP/gates_of_heck" >> "$GITHUB_ENV"
+          echo "GOH_TIMINGS=$RUNNER_TEMP/gate-timings.jsonl" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Rust toolchain (newest stable)
+        run: |
+          set -euo pipefail
+          rustup toolchain install stable --profile minimal \
+            --component rustfmt --component clippy --component llvm-tools-preview \
+            --target x86_64-unknown-linux-musl --target aarch64-unknown-linux-musl
+          echo "RUSTUP_TOOLCHAIN=stable" >> "$GITHUB_ENV"
+          rustc -V
+          cargo -V
+          cargo clippy -V
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.x'
+      - name: pytest (newest)
+        run: python -m pip install --upgrade pytest
+
+      - name: gates_of_heck (the shared gate harness), live
+        run: |
+          set -euo pipefail
+          git clone https://github.com/ztomer/gates_of_heck "$GOH_DIR"
+          git -C "$GOH_DIR" rev-parse HEAD
+
+      - name: Meet goh's tool floors
+        uses: ztomer/gates_of_heck/.github/actions/goh-floors@274ce50e3d4f820de845cedfe85ac69aa6910a1e # v0.54.1
+        with:
+          goh-dir: ${{ env.GOH_DIR }}
+
+      - name: The cargo tools the gate refuses without (newest)
+        run: |
+          set -euo pipefail
+          cargo install --locked cargo-machete cargo-audit cargo-llvm-cov
+
+      - name: shellcheck (newest)
+        run: brew install shellcheck
+
+      - name: Every tool the gate refuses without is here
+        run: |
+          set -euo pipefail
+          names="$(bash "$GOH_DIR/gates/python.sh" "$GOH_DIR/gates/required_tools.py" --repo . --names)"
+          [ -n "$names" ] || { echo "::error::the manifest named no tools"; exit 1; }
+          for t in $names; do
+            command -v "$t" >/dev/null 2>&1 || {
+              echo "::error::the gate refuses without $t, and this workflow does not install it"
+              exit 1
+            }
+          done
+          echo "every tool the gate refuses without is here: $names"
+
+      - name: The runner is the platform the local gate runs on
+        run: |
+          set -euo pipefail
+          os="$(uname -s)"
+          arch="$(uname -m)"
+          if [ "$os" != "Darwin" ] || [ "$arch" != "arm64" ]; then
+            echo "::error::this runner is $os/$arch; the local gate runs on Darwin/arm64"
+            echo "::error::a runner on another platform lints a cfg the local gate never sees"
+            echo "::error::and never lints the one it does -- ROADMAP.md says what that costs"
+            exit 1
+          fi
+          echo "ok: the runner is $os/$arch, the platform the local gate runs on"
+
+      - name: tools/gate.sh --full (the gate of record)
+        env:
+          GOH_TAIL: '200'
+        run: env -u RUNNER_TRACKING_ID tools/gate.sh --full
+
+      - name: "a red gate names itself: the failing step's log"
+        if: failure()
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          dir="$(ls -td "${TMPDIR:-/tmp}"/goh-local-ci.* 2>/dev/null | head -1)"
+          if [ -n "$dir" ]; then
+            for log in "$dir"/step-*.log; do
+              [ -f "$log" ] || continue
+              echo "=== $log (last 40 lines)"
+              tail -40 "$log"
+            done
+          else
+            echo "=== the gate kept no log (it died before its first step)"
+          fi
+
+      - name: The gate's step timings
+        if: always()
+        run: |
+          if [ ! -f "$RUNNER_TEMP/gate-timings.jsonl" ]; then
+            echo "no timings recorded -- the gate did not run, or it died before its first step"
+            exit 0
+          fi
+          bash "$GOH_DIR/gates/python.sh" "$GOH_DIR/lib/step_timings.py" report "$RUNNER_TEMP/gate-timings.jsonl" 30

@@ -1,0 +1,9 @@
+# cargo audit exits 0 on unmaintained/unsound/yanked unless told to deny them
+# (house Rust rule #4); `[output]` also requires `quiet`, or it dies parsing.
+# The ignore list is a RATCHET and starts empty: there is no advisory today.
+[advisories]
+ignore = []
+
+[output]
+deny = ["warnings", "unmaintained", "unsound", "yanked"]
+quiet = false

@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.venv/
+.coverage
+htmlcov/
+
+# opencode session state (local agent scratch, never shared)
+.opencode/
+
+# Rust build output (builds normally use the shared CARGO_TARGET_DIR;
+# a repo-local target/ must never be committed)
+/target/

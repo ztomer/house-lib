@@ -1,0 +1,29 @@
+# gates_of_heck configuration (docs/config.md in the gates_of_heck checkout).
+GOH_MAX_LINES=500
+
+# The gate of record: tools/gate.sh --full (the pre-push hook) and CI both run
+# gates/local_ci.sh, which reads this ONE list. Steps are colon-separated.
+#   rust_gate.sh   fmt, clippy -D warnings (pedantic + nursery, Cargo.toml), every
+#                  shipped cfg (below), goh lints, cargo machete, goh no-allow (no
+#                  #[allow] and no #[expect]), empty-assert, the coverage floor.
+#   cargo audit    with unmaintained/unsound/yanked DENIED as well as warnings: plain
+#                  `cargo audit` exits 0 on those (house Rust rule #4). The deny set is
+#                  on the command line AND in .cargo/audit.toml, so a bare local run bites too.
+#   cargo check    for x86_64-apple-darwin is NOT a step: that target is not installed here,
+#                  and the build-time refusal is proven on wasm32 in the README instead.
+export GOH_DIR="${GOH_DIR:-$HOME/Projects/gates_of_heck}"
+GOH_CI_STEPS='"$GOH_DIR/gates/rust_gate.sh":cargo audit --deny warnings --deny unmaintained --deny unsound --deny yanked:"$GOH_DIR/gates/structural.sh" --full:cargo test --all-targets:bash "$GOH_DIR/gates/python.sh" "$GOH_DIR/checks/check_ci_local_parity.py"'
+GOH_CI_PARITY_EXEMPT='tools/gate.sh: CI runs the gate of record through its own entry point, which runs GOH_CI_STEPS -- the list the pre-push hook runs'
+
+# The house floor. Ratchet: up only.
+GOH_COV_FLOOR_RUST=95
+
+# Every configuration the library builds for, not only this Mac's: the two
+# Linux targets the accept set names (musl, the ones rustup has installed here).
+GOH_RUST_LINT_CONFIGS='--target x86_64-unknown-linux-musl --target aarch64-unknown-linux-musl'
+
+# A direct dependency a major behind is red, not a report line.
+GOH_DEPS_STRICT=1
+
+# A commit that ADDS a test names the mutation that turned it red.
+GOH_RED_RUN=1
