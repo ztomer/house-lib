@@ -95,9 +95,11 @@ A private git dependency needs read credentials wherever cargo fetches it:
 
 ## Part 2 (what the next agent must do)
 
-Status after part 1: the library is tagged `v0.1.0`; ztools' migration is prepared on the
-local branch `lib1-house-lib` in ztools (NOT pushed to main; see "Open: credentials"). Once
-the owner has answered both questions above, for EACH of ztools, sys_updater, app_updates:
+Status after part 1: the library is tagged `v0.1.0`. ztools' migration of `selfheal` and
+the Camoufox rows is on ztools branch `lib1-house-lib` (commit `0187a6e`, pushed, NOT merged
+to main; see "Open: credentials"); ztools' `install.sh` platform gate is still its own copy.
+Once the owner has answered both questions above: merge that branch, then for EACH of
+ztools (only what the branch left), sys_updater, app_updates:
 
 1. Add `house-lib = { git = "https://github.com/ztomer/house-lib", tag = "v0.1.0" }`.
 2. Delete the copies and import the library's:
