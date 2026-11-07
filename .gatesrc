@@ -27,3 +27,19 @@ GOH_DEPS_STRICT=1
 
 # A commit that ADDS a test names the mutation that turned it red.
 GOH_RED_RUN=1
+
+# Every scanner's floor: nine tenths of what each read on 2026-11-07 (the house
+# rule). A full-scope scan that reads less has lost its subject and is red.
+GOH_EMOJI_MIN_FILES=30                # read 34
+GOH_CONFLICT_MARKERS_MIN_FILES=30     # read 34
+GOH_FILE_LENGTH_MIN_FILES=13          # read 15
+GOH_SECRETS_MIN_FILES=30              # read 34
+GOH_SHELL_LINT_MIN_FILES=1            # read 2
+GOH_EARLY_EXIT_PIPE_MIN_FILES=6       # read 7
+GOH_DEAD_AFTER_EXEC_MIN_FILES=6       # read 7
+GOH_BARE_HOOK_INDEX_MIN_FILES=6       # read 7
+GOH_BARE_PYTHON_MIN_FILES=5           # read 6
+GOH_CHECKOUT_CREDENTIALS_MIN_FILES=1  # read 1
+GOH_TAP_WRITES_MIN_FILES=7            # read 8
+GOH_UNREAPED_SPAWN_MIN_FILES=9        # read 10
+GOH_BUSY_LOOP_MIN_FILES=6             # read 7
