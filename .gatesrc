@@ -43,3 +43,6 @@ GOH_CHECKOUT_CREDENTIALS_MIN_FILES=1  # read 1
 GOH_TAP_WRITES_MIN_FILES=7            # read 8
 GOH_UNREAPED_SPAWN_MIN_FILES=9        # read 10
 GOH_BUSY_LOOP_MIN_FILES=6             # read 7
+
+# The one plan (goh roadmap, GOH.ROADMAPGATE): open entries only; debt in roadmap_seed.json.
+GOH_ROADMAP=none
