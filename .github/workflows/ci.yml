@@ -2,6 +2,8 @@
 # command the pre-push hook runs, so CI cannot be weaker or stronger than it.
 # Adapted from sys_updater's workflow (the house shape: goh live, its floors met
 # by its own action, the manifest's tools installed and then checked present).
+# gates_of_heck is cloned at a NAMED release (GOH_TAG), never main (owner ruling
+# 2026-11-08, CI.PUBLIC). Raise GOH_TAG deliberately, in its own commit.
 # macOS on Apple silicon because that is where the local gate runs; the two
 # Linux targets are linted by GOH_RUST_LINT_CONFIGS in .gatesrc.
 name: ci
@@ -21,6 +23,7 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: never
+  GOH_TAG: v0.71.0
 
 jobs:
   gate:
@@ -54,14 +57,14 @@ jobs:
       - name: pytest (newest)
         run: python -m pip install --upgrade pytest
 
-      - name: gates_of_heck (the shared gate harness), live
+      - name: gates_of_heck (the shared gate harness), at its pinned release
         run: |
           set -euo pipefail
-          git clone https://github.com/ztomer/gates_of_heck "$GOH_DIR"
-          git -C "$GOH_DIR" rev-parse HEAD
+          git clone --depth 1 --branch "$GOH_TAG" https://github.com/ztomer/gates_of_heck "$GOH_DIR"
+          git -C "$GOH_DIR" describe --tags --exact-match
 
       - name: Meet goh's tool floors
-        uses: ztomer/gates_of_heck/.github/actions/goh-floors@274ce50e3d4f820de845cedfe85ac69aa6910a1e # v0.54.1
+        uses: ztomer/gates_of_heck/.github/actions/goh-floors@13d906fb78065e701446a943ceed26e5ce919d6a # v0.71.0
         with:
           goh-dir: ${{ env.GOH_DIR }}
 
