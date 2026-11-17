@@ -6,13 +6,14 @@ GOH_MAX_LINES=500
 #   rust_gate.sh   fmt, clippy -D warnings (pedantic + nursery, Cargo.toml), every
 #                  shipped cfg (below), goh lints, cargo machete, goh no-allow (no
 #                  #[allow] and no #[expect]), empty-assert, the coverage floor.
-#   cargo audit    with unmaintained/unsound/yanked DENIED as well as warnings: plain
-#                  `cargo audit` exits 0 on those (house Rust rule #4). The deny set is
-#                  on the command line AND in .cargo/audit.toml, so a bare local run bites too.
+#                  It also audits Cargo.lock (warnings, unmaintained, unsound, yanked
+#                  DENIED) through goh's advisory-db wrapper with goh's shared rulings;
+#                  no second audit step (GOH.AUDITONCE: a raw one refused RUSTSEC-2026-0543,
+#                  which the shared ruling covers; goh's check_raw_audit.py refuses one).
 #   cargo check    for x86_64-apple-darwin is NOT a step: that target is not installed here,
 #                  and the build-time refusal is proven on wasm32 in the README instead.
 export GOH_DIR="${GOH_DIR:-$HOME/Projects/gates_of_heck}"
-GOH_CI_STEPS='"$GOH_DIR/gates/rust_gate.sh":cargo audit --deny warnings --deny unmaintained --deny unsound --deny yanked:"$GOH_DIR/gates/structural.sh" --full:cargo test --all-targets:bash "$GOH_DIR/gates/python.sh" "$GOH_DIR/checks/check_ci_local_parity.py"'
+GOH_CI_STEPS='"$GOH_DIR/gates/rust_gate.sh":"$GOH_DIR/gates/structural.sh" --full:cargo test --all-targets:bash "$GOH_DIR/gates/python.sh" "$GOH_DIR/checks/check_ci_local_parity.py"'
 GOH_CI_PARITY_EXEMPT='tools/gate.sh: CI runs the gate of record through its own entry point, which runs GOH_CI_STEPS -- the list the pre-push hook runs'
 
 # The house floor. Ratchet: up only.
