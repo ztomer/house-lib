@@ -64,7 +64,7 @@ jobs:
           git -C "$GOH_DIR" describe --tags --exact-match
 
       - name: Meet goh's tool floors
-        uses: ztomer/gates_of_heck/.github/actions/goh-floors@13d906fb78065e701446a943ceed26e5ce919d6a # v0.71.0
+        uses: ztomer/gates_of_heck/.github/actions/goh-floors@36f569fb30d6bd14102fe0f4a18ac3b380e60217 # v0.149.6
         with:
           goh-dir: ${{ env.GOH_DIR }}
 
