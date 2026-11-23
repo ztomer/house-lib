@@ -23,7 +23,7 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: never
-  GOH_TAG: v0.149.4
+  GOH_TAG: v0.149.5
 
 jobs:
   gate:
